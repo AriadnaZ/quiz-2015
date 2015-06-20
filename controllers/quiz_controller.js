@@ -50,30 +50,20 @@ exports.new = function(req, res){
 };
 
 exports.create = function(req, res){
-	/*console.log(req.body.quiz);
-	var quiz=models.Quiz.build(req.body.quiz);
-	quiz
-	.save({fields:["pregunta", "respuesta"]})
-	.then(function(){
-		res.redirect('/quizes');
-	});*/
 
-	console.log(req.body.quiz);
 	var quiz=models.Quiz.build(req.body.quiz);
 	err=quiz.validate();
 	console.log(err);
-			if (err) {
-				console.log('HAY ERRORES'+err.errors);
-				res.render('quizes/new', {quiz: quiz, errors: [err.pregunta, err.respuesta]});
-			}
-			else {
-				console.log('3');
-				quiz
-				.save({fields:["pregunta", "respuesta"]})
-				.then(function(){
-					res.redirect('/quizes');
-				});
-			}
+	if (err) {
+		res.render('quizes/new', {quiz: quiz, errors: [err.pregunta, err.respuesta]});
+	}
+	else {
+		quiz
+		.save({fields:["pregunta", "respuesta"]})
+		.then(function(){
+			res.redirect('/quizes');
+		});
+	}
 
 
 	/*console.log(req.body.quiz);
@@ -96,6 +86,34 @@ exports.create = function(req, res){
 			}
 		}
 	);*/
+};
+
+exports.update = function(req, res){
+
+	req.quiz.pregunta=req.body.quiz.pregunta;
+	req.quiz.respuesta=req.body.quiz.respuesta;
+	err=req.quiz.validate();
+	if (err) {
+		res.render('quizes/edit', {quiz: req.quiz, errors: [err.pregunta, err.respuesta]});
+	}
+	else {
+		req.quiz
+		.save({fields:["pregunta", "respuesta"]})
+		.then(function(){
+			res.redirect('/quizes');
+		});
+	}
+};
+
+exports.edit = function(req, res){
+	var quiz = req.quiz;
+	res.render('quizes/edit', {quiz: quiz, errors: []});
+};
+
+exports.destroy = function(req, res){
+	req.quiz.destroy().then(function(){
+		res.redirect('/quizes');
+	}).catch(function(err){next(error);});
 };
 
 
