@@ -2,7 +2,8 @@ var models=require('../models/models.js');
 
 // AUTOLOAD
 exports.load = function(req, res, next, quizId) {
-	models.Quiz.find(quizId).then(
+	models.Quiz.find({where: {id: Number(quizId)},
+				include: [{model: models.Comment}]}).then(
 		function(quiz){
 			if (quiz) {
 				req.quiz=quiz;
@@ -51,7 +52,7 @@ exports.new = function(req, res){
 
 exports.create = function(req, res){
 
-	var quiz=models.Quiz.build(req.body.quiz);
+	/*var quiz=models.Quiz.build(req.body.quiz);
 	err=quiz.validate();
 	console.log(err);
 	if (err) {
@@ -63,29 +64,26 @@ exports.create = function(req, res){
 		.then(function(){
 			res.redirect('/quizes');
 		});
-	}
+	}*/
 
 
-	/*console.log(req.body.quiz);
 	var quiz=models.Quiz.build(req.body.quiz);
 	quiz
 	.validate()
 	.then(
 		function(err){
-			console.log('2');
 			if (err) {
 				res.render('quizes/new', {quiz: quiz, errors: err.errors});
 			}
 			else {
-				console.log('3');
 				quiz
-				.save({fields:["pregunta", "respuesta"]})
+				.save({fields:["pregunta", "respuesta","tema"]})
 				.then(function(){
 					res.redirect('/quizes');
 				});
 			}
 		}
-	);*/
+	);
 };
 
 exports.update = function(req, res){
@@ -93,7 +91,20 @@ exports.update = function(req, res){
 	req.quiz.pregunta=req.body.quiz.pregunta;
 	req.quiz.respuesta=req.body.quiz.respuesta;
 	req.quiz.tema=req.body.quiz.tema;
-	err=req.quiz.validate();
+	req.quiz.validate()
+	.then(function(err) {
+		if(err){
+			res.render('quizes/edit', {quiz: req.quiz, errors: err.errors});
+		}
+		else {
+			req.quiz
+			.save({fields:["pregunta", "respuesta", "tema"]})
+			.then(function(){
+				res.redirect('/quizes');
+			});
+		}
+	});
+	/*req.quiz.validate();
 	if (err) {
 		res.render('quizes/edit', {quiz: req.quiz, errors: [err.pregunta, err.respuesta]});
 	}
@@ -103,7 +114,7 @@ exports.update = function(req, res){
 		.then(function(){
 			res.redirect('/quizes');
 		});
-	}
+	}*/
 };
 
 exports.edit = function(req, res){
