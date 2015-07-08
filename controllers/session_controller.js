@@ -1,3 +1,20 @@
+exports.watchMaxTimeInactive = function(req, res, next) {
+	var actDate = (new Date()).getTime();
+	if (req.session.user) {
+		console.log('actDate-lastAccess' + (actDate - req.session.lastAccess));
+		if (actDate - req.session.lastAccess > 120000) {
+				delete req.session.user;
+				res.redirect('/login');
+		}
+		else {
+			console.log('watchMaxTimeInactive ');
+			req.session.lastAccess = actDate;
+			next();
+		}
+	}
+	else {next();}
+};
+
 exports.loginRequired = function(req, res, next) {
 	if (req.session.user){
 		next();
